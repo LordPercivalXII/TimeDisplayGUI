@@ -36,7 +36,7 @@ elif platform == "darwin":  # macOS
     DIST_PATH = os.path.join(COMPILE_PATH, "dist")
     BUILD_PATH = os.path.join(COMPILE_PATH, "build")
     RESOURCE_PATH = os.path.join(BASE_PATH, "Resources")
-    ICON_PATH = os.path.join(BASE_PATH, "Resources", "TimeDisplayIcon_V2.png")
+    ICON_PATH = os.path.join(BASE_PATH, "Resources", "TimeDisplayIcon_V2_macOS_final.png")
 
 else:  # Supposedly Linux
     # Currently does not support Linux, though the macOS UNIX exec file may suffice (TBD)
