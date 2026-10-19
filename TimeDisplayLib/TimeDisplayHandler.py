@@ -8,6 +8,7 @@ from Qt6UI.QtStyleSheet import QT_STYLESHEET_DARK, QT_STYLESHEET_LIGHT
 from Qt6UI.TimeDisplayUI import Ui_TimeDisplay
 from Qt6UI.TimeDisplayMiniUI import Ui_TimeDisplayMini
 from TimeDisplayLib.FontHandler import FontWeight
+from TimeDisplayLib.SettingsHandler import TimeDisplaySettings
 from UtilLib.ConfigJSON import ConfigJSON, CONFIG_NAME
 
 

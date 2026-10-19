@@ -6,7 +6,6 @@
 # Module Importation
 import os.path
 import PyInstaller.__main__
-import sys
 import time
 from pathlib import Path
 from sys import platform
@@ -39,10 +38,11 @@ elif platform == "darwin":  # macOS
     ICON_PATH = os.path.join(BASE_PATH, "Resources", "TimeDisplayIcon_V2_macOS_final.png")
 
 else:  # Supposedly Linux
-    # Currently does not support Linux, though the macOS UNIX exec file may suffice (TBD)
-    print("[COMPILE_ERROR] Linux currently not supported. Exiting...")
-
-    sys.exit()
+    COMPILE_PATH = os.path.join(BASE_PATH, "CompileBuild", "LINUX")
+    DIST_PATH = os.path.join(COMPILE_PATH, "dist")
+    BUILD_PATH = os.path.join(COMPILE_PATH, "build")
+    RESOURCE_PATH = os.path.join(BASE_PATH, "Resources")
+    ICON_PATH = os.path.join(BASE_PATH, "Resources", "TimeDisplayIcon_V2.png")
 
 print("Compiling TimeDisplay into executable form...")
 time.sleep(1)
