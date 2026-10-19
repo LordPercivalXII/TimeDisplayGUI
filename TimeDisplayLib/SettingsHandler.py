@@ -40,7 +40,7 @@ class TimeDisplaySettings(QDialog):
         self.ui.useMiniUI.setChecked(self.json.return_specific_json("useMiniUI"))
 
         # RemState - MiniUI
-        # self.remStateUI = self.json.return_specific_json("useMiniUI")
+        self.remStateUI = self.json.return_specific_json("useMiniUI")
 
         # Font
         if self.json.return_specific_json("fontType") is not None:
@@ -103,6 +103,9 @@ class TimeDisplaySettings(QDialog):
         self.onSwitchTheme()
         self.onUpdateFont()
 
+        # Check UI Change
+        self.checkUIModeChange()
+
         # Close UI
         self.close()
 
@@ -146,3 +149,7 @@ class TimeDisplaySettings(QDialog):
             # self.ui.setUseNativeTheme.setFont(font)
             # self.ui.useMiniUI.setFont(font)
             self.ui.label.setFont(title_font)
+
+    def checkUIModeChange(self):
+        if self.json.return_specific_json("useMiniUI") != self.remStateUI:
+            self.parent.exitAndReopen()

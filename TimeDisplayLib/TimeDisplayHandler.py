@@ -11,6 +11,8 @@ from TimeDisplayLib.FontHandler import FontWeight
 from TimeDisplayLib.SettingsHandler import TimeDisplaySettings
 from UtilLib.ConfigJSON import ConfigJSON, CONFIG_NAME
 
+EXIT_CODE_REOPEN = 1001
+
 
 if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
     QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -267,6 +269,10 @@ class TimeDisplayGUI(QMainWindow):
         self.old_pos = a0.globalPosition().toPoint()
         a0.accept()
 
+    def exitAndReopen(self):
+        self.timer.stop()
+        QApplication.exit(EXIT_CODE_REOPEN)
+
 
 class TimeDisplayFullGUI(TimeDisplayGUI):
     def __init__(self, parent=None):
@@ -363,25 +369,26 @@ class TimeDisplayFullGUI(TimeDisplayGUI):
 # def apply_liquid_glass_macos(window: QMainWindow):
 #     glass.apply_glass_to_window(window)
 
-def run_GUI():
-    """
-    Run the Graphical User Interface of the Application.
-    :return:
-    """
-    td_app = QApplication(sys.argv)
-    td = TimeDisplayFullGUI()
-    # td.show()
-    sys.exit(td_app.exec())
+def run_TimeDisplay(config: ConfigJSON, use_mini_ui = None):
+    td_app = QApplication(sys.argv) or QApplication().instance()
+    td = None
 
+    while True:
+        if use_mini_ui is None:
+            config.getConfigData() # Re-formulate JSON else data is outdated
+            use_mini_ui = config.return_specific_json("useMiniUI")
 
-def run_MiniGUI():
-    """
-    Run the Graphical User Interface of the Application.
-    :return:
-    """
-    td_app = QApplication(sys.argv)
-    td = TimeDisplayGUI()
-    # td.show()
-    sys.exit(td_app.exec())
+        new_td = TimeDisplayGUI() if use_mini_ui else TimeDisplayFullGUI()
 
+        if td is not None:
+            new_td.move(td.pos())
+            td.close()
+            td.deleteLater()
+        td = new_td
 
+        exit_code = td_app.exec()
+
+        if exit_code != EXIT_CODE_REOPEN:
+            sys.exit(exit_code)
+
+        use_mini_ui = None

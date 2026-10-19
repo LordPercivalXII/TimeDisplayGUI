@@ -62,7 +62,8 @@ if platform == "darwin":  # macOS
             f"--distpath={DIST_PATH}",
             f"--workpath={BUILD_PATH}",
             f"--add-data={RESOURCE_PATH}:Resources",
-            f"-i={ICON_PATH}"
+            f"-i={ICON_PATH}",
+            f"--clean"
         ],
     )
     print("Completed Compilation of file. Editing Info.plist for Dark Mode support...")
@@ -101,6 +102,7 @@ else:  # Windows
             f"--workpath={BUILD_PATH}",
             f"--add-data={RESOURCE_PATH}:Resources",
             f"-i={ICON_PATH}"
+            f"--clean"
         ],
     )
     # os.system(r"start .\Win32_CompileTimeDisplay.cmd")
