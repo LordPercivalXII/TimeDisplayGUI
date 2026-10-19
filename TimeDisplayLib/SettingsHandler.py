@@ -7,7 +7,7 @@ from UtilLib.ConfigJSON import ConfigJSON, CONFIG_NAME
 
 
 class TimeDisplaySettings(QDialog):
-    def __init__(self, parent: TimeDisplayGUI):
+    def __init__(self, parent):
         super(TimeDisplaySettings, self).__init__(parent)
         self.ui = Ui_Settings()
         self.json = ConfigJSON(CONFIG_NAME)
@@ -36,7 +36,7 @@ class TimeDisplaySettings(QDialog):
         self.ui.setFrameless.setChecked(self.json.return_specific_json("framelessWindowBar"))
         self.ui.setUseNativeTheme.setChecked(self.json.return_specific_json("useNativeTheme"))
         self.ui.UseBoldFont.setChecked(self.json.return_specific_json("useBoldFont"))
-        self.ui.FontWeightSelection.setCurrentIndex(FonttWeight.from_label_to_index(self.json.return_specific_json("fontWeight")))
+        self.ui.FontWeightSelection.setCurrentIndex(FontWeight.from_label_to_index(self.json.return_specific_json("fontWeight")))
         self.ui.useMiniUI.setChecked(self.json.return_specific_json("useMiniUI"))
 
         # RemState - MiniUI
