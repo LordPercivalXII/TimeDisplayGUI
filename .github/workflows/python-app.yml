@@ -1,37 +1,45 @@
 # Builds TimeDisplay into a standalone executable on Windows, macOS and Linux
-# using Compile_TimeDisplay.py (PyInstaller), then uploads each build as an artifact.
+# using Compile_TimeDisplay.py (PyInstaller), then attaches the builds to the
+# GitHub Release for the pushed tag.
 
 name: Build TimeDisplay
 
 on:
-  label:
-    types:
-      - created
-  workflow_dispatch:   # lets you run the build manually from the Actions tab
+  push:
+    tags:
+      - "v*"          # e.g. git tag v1.2.0 && git push origin v1.2.0
+  workflow_dispatch:  # manual run from the Actions tab
+    inputs:
+      tag:
+        description: "Existing tag to attach the builds to (e.g. v1.2.0)"
+        required: true
 
 permissions:
-  contents: read
+  contents: write     # required to create a release and upload assets
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false   # one OS failing won't cancel the others
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
-            build_dir: LINUX
+            label: Linux
           - os: macos-latest
-            build_dir: MACOS
+            label: macOS
           - os: windows-latest
-            build_dir: WIN32
+            label: Windows
 
     defaults:
       run:
-        shell: bash   # the scripts below use bash syntax, including on Windows
+        shell: bash
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # On manual runs, build the code at the chosen tag
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
@@ -47,50 +55,58 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Pillow is required because the script passes a .png icon to PyInstaller
           pip install pyqt6 pyqt6-sip pyinstaller pillow
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Build executable using Python compile file
         run: |
-          # The script ends with input("Press [ENTER]..."), which would fail with
-          # EOFError in CI, so pipe a newline into it.
+          # Pipe a newline so the script's final input() prompt doesn't fail in CI
           echo "" | python Compile_TimeDisplay.py
 
-      # The script writes to CompileBuild/<PLATFORM>/dist, not ./dist
+      # The script writes to CompileBuild/<PLATFORM>/dist; package each build
+      # into a single archive so it can be attached to the release.
       - name: Package build (macOS)
         if: runner.os == 'macOS'
         run: |
           cd CompileBuild/MACOS/dist
-          # ditto keeps the .app bundle's symlinks and permissions intact
-          ditto -c -k --keepParent TimeDisplay.app ../../../TimeDisplay-macOS.zip
+          ditto -c -k --keepParent TimeDisplay.app "$GITHUB_WORKSPACE/TimeDisplay-macOS.zip"
 
       - name: Package build (Linux)
         if: runner.os == 'Linux'
         run: |
-          # tar keeps the executable bit, which upload-artifact would otherwise drop
           tar -czf TimeDisplay-Linux.tar.gz -C CompileBuild/LINUX/dist TimeDisplay
 
-      - name: Upload build artifact (macOS)
-        if: runner.os == 'macOS'
-        uses: actions/upload-artifact@v4
-        with:
-          name: TimeDisplay-macOS
-          path: TimeDisplay-macOS.zip
-          if-no-files-found: error
-
-      - name: Upload build artifact (Linux)
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
-        with:
-          name: TimeDisplay-Linux
-          path: TimeDisplay-Linux.tar.gz
-          if-no-files-found: error
-
-      - name: Upload build artifact (Windows)
+      - name: Package build (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path CompileBuild/WIN32/dist/TimeDisplay -DestinationPath TimeDisplay-Windows.zip
+
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TimeDisplay-Windows
-          path: CompileBuild/${{ matrix.build_dir }}/dist/
+          name: TimeDisplay-${{ matrix.label }}
+          path: |
+            TimeDisplay-*.zip
+            TimeDisplay-*.tar.gz
           if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-files
+          merge-multiple: true
+
+      - name: List files to upload
+        run: ls -la release-files
+
+      - name: Attach builds to the release for this tag
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          files: release-files/*
+          fail_on_unmatched_files: true
