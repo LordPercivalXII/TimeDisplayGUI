@@ -238,7 +238,7 @@ class TimeDisplayGUI(QMainWindow):
         size.setWidth(self.json.return_specific_json("memHWindowSize"))
         size.setHeight(self.json.return_specific_json("memVWindowSize"))
 
-        print(size)
+        # print(size)
 
         self.resize(size)
 

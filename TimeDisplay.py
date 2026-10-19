@@ -14,6 +14,7 @@ from pathlib import Path
 from TimeDisplayLib.TimeDisplayHandler import run_GUI, run_MiniGUI
 from UtilLib.ConfigJSON import ConfigJSON, setDebugState_Config
 from UtilLib.ConfigTemplate import CONFIG_DEFAULT, CONFIG_NAME
+from UtilLib.Logging import setup_logger
 # ======================================================================================================================
 # ARGUMENT PARSER
 parser = argparse.ArgumentParser(
@@ -78,6 +79,8 @@ setDebugState_Config(DEBUG_CONFIG, Path(os.path.expanduser("~")).resolve())
 # Should it does not exist, a new file will be created.
 config = ConfigJSON(CONFIG_NAME)
 config.generate_json(CONFIG_DEFAULT)
+
+setup_logger("TimeDisplay", is_root=True, mode="w")
 # ======================================================================================================================
 # Run GUI
 if cmd_args.mini_ui:
