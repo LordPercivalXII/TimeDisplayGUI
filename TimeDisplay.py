@@ -11,7 +11,7 @@ import argparse
 import os
 import sys
 from pathlib import Path
-from TimeDisplayLib.TimeDisplayHandler import run_GUI, run_MiniGUI
+from TimeDisplayLib.TimeDisplayHandler import run_TimeDisplay
 from UtilLib.ConfigJSON import ConfigJSON, setDebugState_Config
 from UtilLib.ConfigTemplate import CONFIG_DEFAULT, CONFIG_NAME
 from UtilLib.Logging import setup_logger
@@ -84,12 +84,10 @@ setup_logger("TimeDisplay", is_root=True, mode="w")
 # ======================================================================================================================
 # Run GUI
 if cmd_args.mini_ui:
-    run_MiniGUI()
+    run_TimeDisplay(config, True)
 elif cmd_args.reg_ui:
-    run_GUI()
-elif not config.return_specific_json("useMiniUI"):
-    run_GUI()
+    run_TimeDisplay(config, False)
 else:
-    run_MiniGUI()
+    run_TimeDisplay(config)
 # ======================================================================================================================
 
