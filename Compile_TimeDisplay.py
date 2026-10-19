@@ -101,7 +101,7 @@ else:  # Windows
             f"--distpath={DIST_PATH}",
             f"--workpath={BUILD_PATH}",
             f"--add-data={RESOURCE_PATH}:Resources",
-            f"-i={ICON_PATH}"
+            f"-i={ICON_PATH}",
             f"--clean"
         ],
     )
