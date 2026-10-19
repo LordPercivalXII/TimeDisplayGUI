@@ -32,7 +32,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['/Users/twelfthdoctor1/GitHub/TimeDisplayGUI/Resources/TimeDisplayIcon_V2.png'],
+    icon=['/Users/twelfthdoctor1/GitHub/TimeDisplayGUI/Resources/TimeDisplayIcon_V2_macOS_final.png'],
 )
 coll = COLLECT(
     exe,
@@ -46,6 +46,6 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name='TimeDisplay.app',
-    icon='/Users/twelfthdoctor1/GitHub/TimeDisplayGUI/Resources/TimeDisplayIcon_V2.png',
+    icon='/Users/twelfthdoctor1/GitHub/TimeDisplayGUI/Resources/TimeDisplayIcon_V2_macOS_final.png',
     bundle_identifier=None,
 )
