@@ -11,7 +11,6 @@ import argparse
 import os
 import sys
 from pathlib import Path
-from MasterApprenticeLib.TD1_Lib_MasterApprentice_Control import setDebugState_Log
 from TimeDisplayLib.TimeDisplayHandler import run_GUI, run_MiniGUI
 from UtilLib.ConfigJSON import ConfigJSON, setDebugState_Config
 from UtilLib.ConfigTemplate import CONFIG_DEFAULT, CONFIG_NAME
