@@ -38,7 +38,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # On manual runs, build the code at the chosen tag
           ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Set up Python 3.13
@@ -60,27 +59,63 @@ jobs:
 
       - name: Build executable using Python compile file
         run: |
-          # Pipe a newline so the script's final input() prompt doesn't fail in CI
+          # Pipe a newline so any input() prompt in the script doesn't fail in CI
           echo "" | python Compile_TimeDisplay.py
 
-      # The script writes to CompileBuild/<PLATFORM>/dist; package each build
-      # into a single archive so it can be attached to the release.
+      # Find wherever PyInstaller put its output instead of hard-coding a path,
+      # so the workflow keeps working if the compile script's paths change.
+      - name: Locate build output
+        run: |
+          python - << 'PY'
+          import os, sys
+
+          skip = {".git", "build", "__pycache__", "venv", ".venv"}
+          candidates = []
+          for root, dirs, files in os.walk("."):
+              if "dist" in dirs:
+                  path = os.path.join(root, "dist")
+                  if os.listdir(path):
+                      candidates.append(path)
+              # don't descend into skipped folders or into dist itself
+              dirs[:] = [d for d in dirs if d not in skip and d != "dist"]
+
+          if not candidates:
+              print("::error::No non-empty 'dist' folder found after compiling. Workspace tree:")
+              for root, dirs, files in os.walk("."):
+                  dirs[:] = [d for d in dirs if d != ".git"]
+                  print(root)
+              sys.exit(1)
+
+          dist = max(candidates, key=os.path.getmtime)   # newest one wins
+          print("Build output folder:", dist)
+          for item in os.listdir(dist):
+              print("  ", item)
+          with open(os.environ["GITHUB_ENV"], "a") as f:
+              f.write(f"DIST_DIR={os.path.abspath(dist)}\n")
+          PY
+
       - name: Package build (macOS)
         if: runner.os == 'macOS'
         run: |
-          cd CompileBuild/MACOS/dist
-          ditto -c -k --keepParent TimeDisplay.app "$GITHUB_WORKSPACE/TimeDisplay-macOS.zip"
+          cd "$DIST_DIR"
+          APP=$(ls -d *.app 2>/dev/null | head -n 1)
+          if [ -n "$APP" ]; then
+            # ditto keeps the .app bundle's symlinks and permissions intact
+            ditto -c -k --keepParent "$APP" "$GITHUB_WORKSPACE/TimeDisplay-macOS.zip"
+          else
+            ditto -c -k . "$GITHUB_WORKSPACE/TimeDisplay-macOS.zip"
+          fi
 
       - name: Package build (Linux)
         if: runner.os == 'Linux'
         run: |
-          tar -czf TimeDisplay-Linux.tar.gz -C CompileBuild/LINUX/dist TimeDisplay
+          tar -czf TimeDisplay-Linux.tar.gz -C "$DIST_DIR" .
 
       - name: Package build (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Compress-Archive -Path CompileBuild/WIN32/dist/TimeDisplay -DestinationPath TimeDisplay-Windows.zip
+          Compress-Archive -Path "$env:DIST_DIR\*" -DestinationPath TimeDisplay-Windows.zip
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
