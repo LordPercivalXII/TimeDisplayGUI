@@ -19,13 +19,16 @@ pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
     a.scripts,
+    a.binaries,
+    a.datas,
     [],
-    exclude_binaries=True,
     name='TimeDisplay',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
@@ -34,17 +37,8 @@ exe = EXE(
     entitlements_file=None,
     icon=['/Users/twelfthdoctor1/GitHub/TimeDisplayGUI/Resources/TimeDisplayIcon_V2_macOS_final.png'],
 )
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name='TimeDisplay',
-)
 app = BUNDLE(
-    coll,
+    exe,
     name='TimeDisplay.app',
     icon='/Users/twelfthdoctor1/GitHub/TimeDisplayGUI/Resources/TimeDisplayIcon_V2_macOS_final.png',
     bundle_identifier=None,
