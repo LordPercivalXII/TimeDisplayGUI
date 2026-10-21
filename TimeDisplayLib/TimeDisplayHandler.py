@@ -398,6 +398,8 @@ def run_TimeDisplay(config: ConfigJSON, use_mini_ui = None):
             td.deleteLater()
         td = new_td
 
+        td.setWindowIcon(QIcon(os.path.join(Path(__file__).resolve().parent, "Resources","TimeDisplayIcon_V2.png").__str__()))
+
         exit_code = td_app.exec()
 
         if exit_code != EXIT_CODE_REOPEN:
