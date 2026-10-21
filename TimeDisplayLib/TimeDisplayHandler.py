@@ -41,6 +41,7 @@ class TimeDisplayGUI(QMainWindow):
 
         # Run Settings
         self.initResize()
+        self.centerWindow()
         self.updateSettingState()
         self.onFloatChange()
         self.onSwitchTheme()
@@ -244,6 +245,12 @@ class TimeDisplayGUI(QMainWindow):
         # print(size)
 
         self.resize(size)
+
+    def centerWindow(self):
+        qr = self.frameGeometry()
+        cp = self.screen().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
     def onSwitchTheme(self):
         if self.json.return_specific_json("useNativeTheme"):
