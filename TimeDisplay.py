@@ -8,6 +8,7 @@
 # ======================================================================================================================
 # Module Importation
 import argparse
+import ctypes
 import os
 import sys
 from pathlib import Path
@@ -82,6 +83,10 @@ config.generate_json(CONFIG_DEFAULT)
 
 setup_logger("TimeDisplay", is_root=True, mode="w")
 # ======================================================================================================================
+if sys.platform == "win32":
+    app_id = "lpxii.timedisplay.v1"
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
+
 # Run GUI
 if cmd_args.mini_ui:
     run_TimeDisplay(config, True)

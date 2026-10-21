@@ -32,7 +32,6 @@ class TimeDisplayGUI(QMainWindow):
         # Setup UI
         self.ui.setupUi(self)
         self.setWindowTitle("TimeDisplay")
-        self.setWindowIcon(QIcon(os.path.join(Path(__file__).resolve().parent, "Resources","TimeDisplayIcon_V2.png").__str__()))
         self._connectActions()
 
         # Config Data
@@ -293,7 +292,6 @@ class TimeDisplayFullGUI(TimeDisplayGUI):
         # Setup UI
         self.ui.setupUi(self)
         self.setWindowTitle("TimeDisplay")
-        self.setWindowIcon(QIcon(os.path.join(Path(__file__).resolve().parent, "Resources","TimeDisplayIcon_V2.png").__str__()))
         self._connectActions()
 
         # Config Data
@@ -398,7 +396,7 @@ def run_TimeDisplay(config: ConfigJSON, use_mini_ui = None):
             td.deleteLater()
         td = new_td
 
-        td.setWindowIcon(QIcon(os.path.join(Path(__file__).resolve().parent, "Resources","TimeDisplayIcon_V2.png").__str__()))
+        td.setWindowIcon(QIcon(os.path.join(Path(__file__).resolve().parent.parent, "Resources","TimeDisplayIcon_V2.png").__str__()))
 
         exit_code = td_app.exec()
 
