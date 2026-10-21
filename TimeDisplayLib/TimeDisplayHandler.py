@@ -1,8 +1,10 @@
 import datetime
+import os
 import sys
+from pathlib import Path
 from PyQt6 import QtCore
 from PyQt6.QtCore import QTimer, Qt, QSize
-from PyQt6.QtGui import QFont, QResizeEvent
+from PyQt6.QtGui import QFont, QIcon, QResizeEvent
 from PyQt6.QtWidgets import QMainWindow, QApplication, QLayout
 from Qt6UI.QtStyleSheet import QT_STYLESHEET_DARK, QT_STYLESHEET_LIGHT
 from Qt6UI.TimeDisplayUI import Ui_TimeDisplay
@@ -30,6 +32,7 @@ class TimeDisplayGUI(QMainWindow):
         # Setup UI
         self.ui.setupUi(self)
         self.setWindowTitle("TimeDisplay")
+        self.setWindowIcon(QIcon(os.path.join(Path(__file__).resolve().parent, "Resources","TimeDisplayIcon_V2.png").__str__()))
         self._connectActions()
 
         # Config Data
@@ -290,6 +293,7 @@ class TimeDisplayFullGUI(TimeDisplayGUI):
         # Setup UI
         self.ui.setupUi(self)
         self.setWindowTitle("TimeDisplay")
+        self.setWindowIcon(QIcon(os.path.join(Path(__file__).resolve().parent, "Resources","TimeDisplayIcon_V2.png").__str__()))
         self._connectActions()
 
         # Config Data
@@ -301,6 +305,7 @@ class TimeDisplayFullGUI(TimeDisplayGUI):
 
         # Run Settings
         self.initResize()
+        self.centerWindow()
         self.updateSettingState()
         self.onFloatChange()
         self.onSwitchTheme()
