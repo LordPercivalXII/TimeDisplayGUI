@@ -372,13 +372,6 @@ class TimeDisplayFullGUI(TimeDisplayGUI):
             self.ui.DateSep.setFont(date_font)
             self.ui.DayName.setFont(date_font)
 
-
-# def prep_liquid_glass_macos(window: QMainWindow):
-#     glass.prepare_window_for_glass(window)
-#
-# def apply_liquid_glass_macos(window: QMainWindow):
-#     glass.apply_glass_to_window(window)
-
 def run_TimeDisplay(config: ConfigJSON, use_mini_ui = None):
     td_app = QApplication(sys.argv) or QApplication().instance()
     td = None
