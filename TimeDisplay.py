@@ -69,24 +69,26 @@ cmd_args = parser.parse_args(sys.argv[1:])
 # Setting to configure Filepath for Config, use of Logging for Debugging.
 # Files will be saved in the ~ Directory (ref. User Directory)
 DEBUG_CONFIG = False or cmd_args.debug_config
-# DEBUG_LOG = False or cmd_args.debug_log
-# DEBUG_ENABLE_MLOG = False # or cmd_args.debug_mlog
 
 setDebugState_Config(DEBUG_CONFIG, Path(os.path.expanduser("~")).resolve())
-# setDebugState_Log(DEBUG_LOG, DEBUG_ENABLE_MLOG, Path(os.path.expanduser("~")).resolve())
 # ======================================================================================================================
 # Init Settings
+# Init Main Logger
+setup_logger("TimeDisplay", is_root=True, mode="w")
+
 # Initialise the Config File for checks
 # Should it does not exist, a new file will be created.
 config = ConfigJSON(CONFIG_NAME)
 config.generate_json(CONFIG_DEFAULT)
-
-setup_logger("TimeDisplay", is_root=True, mode="w")
 # ======================================================================================================================
+# Windows/Linux Set App ID for Icons to be rendered accordingly
 if sys.platform == "win32":
     app_id = "lpxii.timedisplay.v1"
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
-
+# Linux - Set to XWayland for certain features to work
+if sys.platform != "win32" and sys.platform != "darwin":
+    os.environ["QT_QPA_PLATFORM"] = "xcb"
+# ======================================================================================================================
 # Run GUI
 if cmd_args.mini_ui:
     run_TimeDisplay(config, True)
