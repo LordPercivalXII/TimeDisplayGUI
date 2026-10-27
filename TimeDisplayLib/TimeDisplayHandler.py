@@ -268,6 +268,12 @@ class TimeDisplayGUI(QMainWindow):
 
     def onUpdateWindowBar(self):
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint, self.json.return_specific_json("framelessWindowBar"))
+
+        # Handle Hiding of Menu Bar + Settings Option
+        if self.json.return_specific_json("framelessWindowBar"):
+            self.ui.menubar.hide()
+        else:
+            self.ui.menubar.show()
         self.show()
 
     def mousePressEvent(self, a0):
