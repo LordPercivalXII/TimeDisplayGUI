@@ -67,7 +67,7 @@ class TimeDisplayGUI(QMainWindow):
         # Timer to Refresh UI
         self.timer = QTimer()
         self.timer.timeout.connect(self.processTimeDisplay)
-        self.timer.setInterval(10)
+        self.timer.setInterval(self.json.return_specific_json("intervalRate"))
         self.timer.start()
 
         # Frameless Window Movement Position
@@ -270,10 +270,7 @@ class TimeDisplayGUI(QMainWindow):
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint, self.json.return_specific_json("framelessWindowBar"))
 
         # Handle Hiding of Menu Bar + Settings Option
-        if self.json.return_specific_json("framelessWindowBar"):
-            self.ui.menubar.hide()
-        else:
-            self.ui.menubar.show()
+        self.ui.menubar.setVisible(not self.json.return_specific_json("framelessWindowBar"))
         self.show()
 
     def mousePressEvent(self, a0):

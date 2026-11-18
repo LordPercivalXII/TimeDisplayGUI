@@ -30,6 +30,7 @@ CONFIG_DEFAULT = {
     "useNativeTheme": False,  # Use Native Theme - Use OS Theme Colours or Light/Dark Mode
     "useBoldFont": False,  # Use Bold Font - if Regular Font is not strong enough for illustration
     "fontWeight": "Normal",  # Font Weight
-    "useMiniUI": False  # Use Mini UI - Will only show clock display
+    "useMiniUI": False,  # Use Mini UI - Will only show clock display
+    "intervalRate": 10  # QTimer Interval Rate
 }
 # ======================================================================================================================
