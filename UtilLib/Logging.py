@@ -26,8 +26,6 @@ class LoggingLevel(enum.Enum):
         self.index = index
 
 
-
-
 class LoggerClass:
     """
     A dual function Logger cloning ApprenticeLogger & MasterLogger
@@ -85,7 +83,6 @@ def setup_logger(log_file: str, level: int = logging.INFO, mode: str = "a", is_r
     :param is_root: Whether the logger should be set as root or not
     :return:
     """
-
 
     fmt = logging.Formatter(
         "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
