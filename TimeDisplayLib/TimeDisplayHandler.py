@@ -75,6 +75,9 @@ class TimeDisplayGUI(QMainWindow):
 
         self.ui.horizontalLayout_2.setSizeConstraint(QLayout.SizeConstraint.SetNoConstraint)
 
+        self._applied_font_key = None
+        self.refreshFonts()
+
     def _connectActions(self):
         self.ui.action_Settings.triggered.connect(self.openSettings)
         self.ui.action_Float_on_Top.triggered.connect(self.settingFloat)
@@ -121,31 +124,38 @@ class TimeDisplayGUI(QMainWindow):
             self.ui.Secs.setVisible(False)
             self.ui.Sep2.setVisible(False)
 
+    def _fontKey(self):
+        """Every config value that affects the fonts."""
+        j = self.json.return_specific_json
+        return (j("fontType"), j("fontSizeTime"), j("fontSize12Hr"),
+                j("fontSizeDate"), j("useBoldFont"), j("fontWeight"))
+
+    def _makeFont(self, size: int) -> QFont:
+        j = self.json.return_specific_json
+        font = QFont(j("fontType"), max(1, size))       # stops sizes going to 0 or below
+        weight = FontWeight.from_label_to_weight(j("fontWeight"))
+        if j("useBoldFont") and weight < QFont.Weight.Bold:
+            weight = QFont.Weight.Bold                   # Bold is the minimum, so ExtraBold/Black stay as they are
+        font.setWeight(weight)
+        return font
+
+    def refreshFonts(self, force: bool = False):
+        """Rebuild fonts only if a font-related setting changed."""
+        key = self._fontKey()
+        if not force and key == self._applied_font_key:
+            return
+        self._applied_font_key = key
+        if key[0] is not None:          # fontType None means keep the default from the .ui file
+            self.updateFont()
+
     def updateFont(self):
-        if self.json.return_specific_json("fontType") is not None:
-            time_font = QFont(
-                self.json.return_specific_json("fontType"), self.json.return_specific_json("fontSizeTime")
-            )
-            hr12notation_font = QFont(
-                self.json.return_specific_json("fontType"), self.json.return_specific_json("fontSize12Hr")
-                if self.json.return_specific_json("fontSize12Hr") <= self.json.return_specific_json("fontSizeTime")
-                else self.json.return_specific_json("fontSizeTime"))
+        j = self.json.return_specific_json
+        time_font = self._makeFont(j("fontSizeTime"))
+        hr12_font = self._makeFont(min(j("fontSize12Hr"), j("fontSizeTime")))
 
-            # Set Bold
-            time_font.setBold(self.json.return_specific_json("useBoldFont"))
-            hr12notation_font.setBold(self.json.return_specific_json("useBoldFont"))
-
-            # Set Weight
-            time_font.setWeight(FontWeight.from_label_to_weight(self.json.return_specific_json("fontWeight")))
-            hr12notation_font.setWeight(FontWeight.from_label_to_weight(self.json.return_specific_json("fontWeight")))
-
-            self.ui.Hour.setFont(time_font)
-            self.ui.Mins.setFont(time_font)
-            self.ui.Secs.setFont(time_font)
-            self.ui.Sep1.setFont(time_font)
-            self.ui.Sep2.setFont(time_font)
-
-            self.ui.hr12Notation.setFont(hr12notation_font)
+        for w in (self.ui.Hour, self.ui.Mins, self.ui.Secs, self.ui.Sep1, self.ui.Sep2):
+            w.setFont(time_font)
+        self.ui.hr12Notation.setFont(hr12_font)
 
     def openSettings(self):
         settings_ui = TimeDisplaySettings(parent=self)
@@ -179,6 +189,7 @@ class TimeDisplayGUI(QMainWindow):
         self.onFloatChange()
         self.onUpdateWinVisibility()
         self.onUpdateWindowBar()
+        self.refreshFonts()
 
     def settingFloat(self):
         self.json.update_specific_json("isFloating", self.ui.action_Float_on_Top.isChecked())
@@ -221,6 +232,7 @@ class TimeDisplayGUI(QMainWindow):
         self.json.update_specific_json("fontSizeDate", self.json.return_specific_json("fontSizeDate") + value)
         self.json.update_specific_json("fontSize12Hr", self.json.return_specific_json("fontSize12Hr") + value)
         self.json.update_json_file()
+        self.refreshFonts()
 
     def settingIncreaseFont(self):
         self.settingChangeFont(1)
@@ -231,6 +243,7 @@ class TimeDisplayGUI(QMainWindow):
     def settingUpdateUseBoldFont(self):
         self.json.update_specific_json("useBoldFont", self.ui.actionUse_Bold_Font.isChecked())
         self.json.update_json_file()
+        self.refreshFonts()
 
     def resizeEvent(self, a0: QResizeEvent):
         super().resizeEvent(a0)
@@ -330,7 +343,7 @@ class TimeDisplayFullGUI(TimeDisplayGUI):
         # Timer to Refresh UI
         self.timer = QTimer()
         self.timer.timeout.connect(self.processTimeDisplay)
-        self.timer.setInterval(10)
+        self.timer.setInterval(self.json.return_specific_json("intervalRate"))
         self.timer.start()
 
         # Frameless Window Movement Position
@@ -360,20 +373,9 @@ class TimeDisplayFullGUI(TimeDisplayGUI):
 
     def updateFont(self):
         super().updateFont()
-        if self.json.return_specific_json("fontType") is not None:
-            date_font = QFont(
-                self.json.return_specific_json("fontType"), self.json.return_specific_json("fontSizeDate")
-            )
-
-            # Set Bold
-            date_font.setBold(self.json.return_specific_json("useBoldFont"))
-
-            # Set Weight
-            date_font.setWeight(FontWeight.from_label_to_weight(self.json.return_specific_json("fontWeight")))
-
-            self.ui.Date.setFont(date_font)
-            self.ui.DateSep.setFont(date_font)
-            self.ui.DayName.setFont(date_font)
+        date_font = self._makeFont(self.json.return_specific_json("fontSizeDate"))
+        for w in (self.ui.Date, self.ui.DateSep, self.ui.DayName):
+            w.setFont(date_font)
 
 def run_TimeDisplay(config: ConfigJSON, use_mini_ui = None):
     td_app = QApplication(sys.argv) or QApplication().instance()

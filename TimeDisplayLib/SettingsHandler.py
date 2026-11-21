@@ -49,7 +49,7 @@ class TimeDisplaySettings(QDialog):
 
             # Set Bold
             # font.setBold(self.json.return_specific_json("useBoldFont"))
-            title_font.setBold(self.json.return_specific_json("useNativeTheme"))
+            title_font.setBold(self.json.return_specific_json("useBoldFont"))
 
             # Set Weight
             # font.setWeight(FontWeight.from_label_to_weight(self.json.return_specific_json("fontWeight")))
