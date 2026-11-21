@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from PyQt6 import QtCore
 from PyQt6.QtCore import QTimer, Qt, QSize
-from PyQt6.QtGui import QFont, QIcon, QResizeEvent
+from PyQt6.QtGui import QFont, QIcon, QResizeEvent, QCloseEvent
 from PyQt6.QtWidgets import QMainWindow, QApplication, QLayout
 from Qt6UI.QtStyleSheet import QT_STYLESHEET_DARK, QT_STYLESHEET_LIGHT
 from Qt6UI.TimeDisplayUI import Ui_TimeDisplay
@@ -14,6 +14,7 @@ from TimeDisplayLib.SettingsHandler import TimeDisplaySettings
 from UtilLib.ConfigJSON import ConfigJSON, CONFIG_NAME
 
 EXIT_CODE_REOPEN = 1001
+SIZE_SAVE_DELAY_MS = 500  # Wait this long after the last resize event before writing the size to disk
 
 
 if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
@@ -158,6 +159,8 @@ class TimeDisplayGUI(QMainWindow):
         self.ui.hr12Notation.setFont(hr12_font)
 
     def openSettings(self):
+        # Write any pending size first: the dialog reads the file and would otherwise drop it
+        self.flushWindowSize()
         settings_ui = TimeDisplaySettings(parent=self)
         settings_ui.setWindowTitle("Settings")
         settings_ui.exec()
@@ -248,9 +251,35 @@ class TimeDisplayGUI(QMainWindow):
     def resizeEvent(self, a0: QResizeEvent):
         super().resizeEvent(a0)
         size = self.size()
+
+        # Nothing to do if the size matches what is already stored (e.g. on first show)
+        if (self.json.return_specific_json("memHWindowSize") == size.width()
+                and self.json.return_specific_json("memVWindowSize") == size.height()):
+            return
+
+        # Update the in-memory config straight away; it costs nothing
         self.json.update_specific_json("memHWindowSize", size.width())
         self.json.update_specific_json("memVWindowSize", size.height())
-        self.json.update_json_file()
+
+        # Debounce the disk write: each resize event restarts the countdown,
+        # so a drag only writes once, after the window has stopped changing.
+        if getattr(self, "_size_save_timer", None) is None:
+            self._size_save_timer = QTimer(self)
+            self._size_save_timer.setSingleShot(True)
+            self._size_save_timer.setInterval(SIZE_SAVE_DELAY_MS)
+            self._size_save_timer.timeout.connect(self.json.update_json_file)
+        self._size_save_timer.start()
+
+    def flushWindowSize(self):
+        """Write a pending window size to disk now, if a save is still waiting."""
+        timer = getattr(self, "_size_save_timer", None)
+        if timer is not None and timer.isActive():
+            timer.stop()
+            self.json.update_json_file()
+
+    def closeEvent(self, a0: QCloseEvent):
+        self.flushWindowSize()
+        super().closeEvent(a0)
 
     def initResize(self):
         size = QSize()
@@ -295,6 +324,7 @@ class TimeDisplayGUI(QMainWindow):
         a0.accept()
 
     def exitAndReopen(self):
+        self.flushWindowSize()
         self.timer.stop()
         QApplication.exit(EXIT_CODE_REOPEN)
 
