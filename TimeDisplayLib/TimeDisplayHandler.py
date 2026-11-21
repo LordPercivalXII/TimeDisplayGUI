@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from PyQt6 import QtCore
 from PyQt6.QtCore import QTimer, Qt, QSize
-from PyQt6.QtGui import QFont, QIcon, QResizeEvent, QCloseEvent
+from PyQt6.QtGui import QFont, QIcon, QResizeEvent, QCloseEvent, QContextMenuEvent
 from PyQt6.QtWidgets import QMainWindow, QApplication, QLayout
 from Qt6UI.QtStyleSheet import QT_STYLESHEET_DARK, QT_STYLESHEET_LIGHT
 from Qt6UI.TimeDisplayUI import Ui_TimeDisplay
@@ -93,6 +93,16 @@ class TimeDisplayGUI(QMainWindow):
         self.ui.actionFrameless.triggered.connect(self.settingFramelessWindowBar)
         self.ui.actionUse_Native_Theme.triggered.connect(self.settingUseNativeTheme)
         self.ui.actionUse_Bold_Font.triggered.connect(self.settingUpdateUseBoldFont)
+
+        # Register the menu's actions on the window itself. Qt only fires an action's shortcut while
+        # a widget it belongs to is visible, so when the menu bar is hidden (frameless mode) every
+        # shortcut used to stop working and the only way back was editing the JSON. (#4)
+        self.addActions(self.ui.menuOptions.actions())
+
+    def contextMenuEvent(self, a0: QContextMenuEvent):
+        """Right-click anywhere on the clock to open the Options menu, even with the menu bar hidden."""
+        self.ui.menuOptions.exec(a0.globalPos())
+        a0.accept()
 
     def processTimeDisplay(self):
         self.getTime()
@@ -319,6 +329,9 @@ class TimeDisplayGUI(QMainWindow):
         self.old_pos = a0.globalPosition().toPoint()
 
     def mouseMoveEvent(self, a0):
+        # Only drag with the left button, so a right-click for the menu doesn't move the window
+        if not a0.buttons() & Qt.MouseButton.LeftButton:
+            return
         self.move(self.pos() + a0.globalPosition().toPoint() - self.old_pos)
         self.old_pos = a0.globalPosition().toPoint()
         a0.accept()
