@@ -95,8 +95,9 @@ class TimeDisplayGUI(QMainWindow):
         self.ui.actionUse_Bold_Font.triggered.connect(self.settingUpdateUseBoldFont)
 
     def processTimeDisplay(self):
+        # Only the time text changes per tick. Fonts are rebuilt by refreshFonts() when a
+        # font setting changes (init, Settings, Increase/Decrease Font, Bold).
         self.getTime()
-        self.updateFont()
 
     def getTime(self):
         self.dt = datetime.datetime.now()
@@ -380,6 +381,9 @@ class TimeDisplayFullGUI(TimeDisplayGUI):
         self.old_pos = self.pos()
 
         self.ui.horizontalLayout_2.setSizeConstraint(QLayout.SizeConstraint.SetNoConstraint)
+
+        self._applied_font_key = None
+        self.refreshFonts()
 
     def getTime(self):
         super().getTime()
