@@ -2,17 +2,24 @@ name: Auto Assign
 on:
   issues:
     types: [opened]
-  pull_request:
+  # pull_request_target (not pull_request) so PRs from forks also get a write token.
+  # Safe here: this job never checks out or runs code from the PR.
+  pull_request_target:
     types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
-  run:
+  assign:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
     steps:
-    - name: 'Auto-assign issue'
-      uses: pozil/auto-assign-issue@v1
-      with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          assignees: LordPercivalXII
+      - name: Assign to repo owner
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          ASSIGNEE: LordPercivalXII
+        # PRs are issues in the GitHub API, so one endpoint covers both events.
+        run: gh api -X POST "repos/$GH_REPO/issues/$NUMBER/assignees" -f "assignees[]=$ASSIGNEE"
