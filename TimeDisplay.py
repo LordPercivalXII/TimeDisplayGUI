@@ -4,7 +4,7 @@
 # An application that displays time in a window.
 #
 # Author: TwelfthDoctor1 [TD1]
-# License: NIL/TBD~, Likely MIT
+# License: MIT
 # ======================================================================================================================
 # Module Importation
 import argparse

@@ -203,6 +203,7 @@ class TimeDisplayGUI(QMainWindow):
         self.onFloatChange()
         self.onUpdateWinVisibility()
         self.onUpdateWindowBar()
+        self.onUpdateIntervalRate()
         self.refreshFonts()
 
     def settingFloat(self):
@@ -325,6 +326,9 @@ class TimeDisplayGUI(QMainWindow):
         # Handle Hiding of Menu Bar + Settings Option
         self.ui.menubar.setVisible(not self.json.return_specific_json("framelessWindowBar"))
         self.show()
+
+    def onUpdateIntervalRate(self):
+        self.timer.setInterval(self.json.return_specific_json("intervalRate"))
 
     def mousePressEvent(self, a0):
         self.old_pos = a0.globalPosition().toPoint()

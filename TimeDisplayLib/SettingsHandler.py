@@ -38,6 +38,7 @@ class TimeDisplaySettings(QDialog):
         self.ui.UseBoldFont.setChecked(self.json.return_specific_json("useBoldFont"))
         self.ui.FontWeightSelection.setCurrentIndex(FontWeight.from_label_to_index(self.json.return_specific_json("fontWeight")))
         self.ui.useMiniUI.setChecked(self.json.return_specific_json("useMiniUI"))
+        self.ui.intervalRateSpinBox.setValue(self.json.return_specific_json("intervalRate"))
 
         # RemState - MiniUI
         self.remStateUI = self.json.return_specific_json("useMiniUI")
@@ -95,6 +96,7 @@ class TimeDisplaySettings(QDialog):
         self.json.update_specific_json("useBoldFont", self.ui.UseBoldFont.isChecked())
         self.json.update_specific_json("fontWeight", self.ui.FontWeightSelection.currentText())
         self.json.update_specific_json("useMiniUI", self.ui.useMiniUI.isChecked())
+        self.json.update_specific_json("intervalRate", self.ui.intervalRateSpinBox.value())
 
         # Update JSON File
         self.json.update_json_file()
